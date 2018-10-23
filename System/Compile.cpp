@@ -23,7 +23,8 @@ void Compile::loop(std::unique_lock<std::mutex>& ul)
 		ul.unlock();
 
 		mark->state = State::Compiling;
-		logger->log('[' + mark->userId + "] user compiling = " + std::to_string(waiting_cnt));
+		
+		logger->log(mark, "compiling");
 
 		int pid = fork();
 		if (pid == 0)
@@ -38,7 +39,7 @@ void Compile::loop(std::unique_lock<std::mutex>& ul)
 		if (WIFEXITED(status) == 0 || WEXITSTATUS(status) != 0) mark->state = State::CompileError;
 		else mark->state = State::ExeIdle;
 
-		logger->log('[' + mark->userId + "] compile end, result = " + (mark->state == State::ExeIdle ? "success" : "fail"));
+		logger->log(mark, string("compile ") + (mark->state == State::ExeIdle ? "success" : "fail"));
 
 		if (mark->state == State::ExeIdle) run->run(mark);
 		else wp->wrapUp(mark);

@@ -8,8 +8,8 @@ const char* COMPILE_STDERR_FILE_EXTENSION = ".compile.stderr";
 const char* USER_DIR_PATH = "../Users/";
 const char* PROBLEMS_DIR_PATH = "../Problems/";
 
-Mark::Mark(const string& userId, const string& srcFileName, const int problemNum) :
-	userId(userId), srcFileName(srcFileName), problemNum(problemNum),
+Mark::Mark(const string& userId, const string& srcFileName, const int problemNum, const int judge_number) :
+	userId(userId), srcFileName(srcFileName), problemNum(problemNum), judge_number(judge_number),
 	srcFilePath(USER_DIR_PATH + userId + "/" + srcFileName),
 	binFilePath(USER_DIR_PATH + userId + "/" + srcFileName + ".bin"),
 	/*
@@ -46,11 +46,18 @@ Mark::Mark(const string& userId, const string& srcFileName, const int problemNum
 	else
 	{
 		support = false;
+		msg = "extension unsupported";
 		return;
 	}
 
 	const string conditionPath = problemNumPath + CONDITION_FILE_NAME;
 	FILE* conFile = fopen(conditionPath.c_str(), "rt");
+	if (conFile == nullptr)
+	{
+		support = false;
+		msg = conditionPath + " file open fail";
+		return;
+	}
 	fscanf(conFile, "%d %d %d", &TC_NUM, &LIM_TIME_SEC, &LIM_MEM_MB);
 	fclose(conFile);
 

@@ -2,8 +2,8 @@
 
 #include <iostream>
 #include <string>
-
 #include "Event.h"
+#include "Mark.h"
 
 using std::string;
 
@@ -18,6 +18,11 @@ public:
 
 	inline void log(const string& s)
 	{
+		Event<string>::push(s);
+	}
+	inline void log(const Mark* mark, const string& msg)
+	{
+		const string s = '[' + mark->userId + ", " + std::to_string(mark->judge_number) + "] " + msg;
 		Event<string>::push(s);
 	}
 

@@ -18,11 +18,12 @@ int main()
 
 	bool is = true;
 	std::thread test = std::thread([&]() {
-		const string PATH = "/mnt/c/Users/Jinho/Desktop/JOJ2/Users/testuser/";
+		const string PATH = "../Users/testuser/";
 		FILE* r = fopen((PATH + "test.c").c_str(), "rt");
 		char buf[512] = { 0, };
 		fread(buf, 1, 512, r);
 		fclose(r);
+		int i = 0;
 		while (is)
 		{
 			std::string fileName = "9999.";
@@ -31,12 +32,12 @@ int main()
 			FILE* w = fopen((PATH + fileName).c_str(), "wt");
 			fwrite(buf, 1, strlen(buf), w);
 			fclose(w);
-			Mark* mark = new Mark("testuser", fileName, 9999);
+			Mark* mark = new Mark("testuser", fileName, 9999, i);
 			judge->judge(mark);
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(75));
 
-		//	for (int i = 0; mark->compileCmd[i] != nullptr; ++i) logger->log(mark->compileCmd[i]);
+			if (++i == 1) break;
 		}
 	});
 

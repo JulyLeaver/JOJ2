@@ -34,7 +34,8 @@ void Run::loop(std::unique_lock<std::mutex>& ul)
 
 		std::vector<std::thread> executing;
 		std::vector<Mark*> marks;
-		for (int i = 0; i < CCU; ++i)
+
+		for (int i = 0; i < CCU; ++i) // 동시 접속 중일 때... 즉 한명 접속 하고 그 한명을 위한 채점 중일 떄 다른 한명이 push되어도 대기된다.
 		{
 			if (_q.empty()) break;
 
@@ -46,7 +47,7 @@ void Run::loop(std::unique_lock<std::mutex>& ul)
 
 		ul.unlock();
 
-		for (int i = 0; i < (int)executing.size(); ++i) executing[i].join();
+		for (int i = 0; i < (int)executing.size(); ++i) executing[i].join(); // 즉, 여기 바로 오기전 까지 동접이 없다면 그 한명을 위한 채점 중일 때 다른 한명이 push 되어도 대기
 		for (auto i : marks) wp->wrapUp(i);
 	}
 }
@@ -54,7 +55,8 @@ void Run::loop(std::unique_lock<std::mutex>& ul)
 void Run::executing(Mark* mark)
 {
 	mark->state = State::Executing;
-	logger->log('[' + mark->userId + "] executing");
+
+	logger->log(mark, "execut start");
 
 	const int LIM_TIME_SEC = mark->LIM_TIME_SEC;
 	const int LIM_MEM_MB = mark->LIM_MEM_MB;
@@ -67,7 +69,7 @@ void Run::executing(Mark* mark)
 	int now_tc_num;
 	for (now_tc_num = 1; now_tc_num <= TC_NUM; ++now_tc_num)
 	{
-		logger->log('[' + mark->userId + "] " + std::to_string(now_tc_num) + " test case, excuting");
+		logger->log(mark, std::to_string(now_tc_num) + " TC excuting");
 
 		int pid = fork();
 		if (pid == 0)
@@ -78,8 +80,9 @@ void Run::executing(Mark* mark)
 
 			setrlimit(RLIMIT_CPU, &rlim);
 
-			ptrace(PTRACE_TRACEME, 0, 0, 0);
-			execl(mark->binFilePath.c_str(), mark->binFilePath.c_str(), nullptr);
+			ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
+			const string exe_string = "./" + mark->binFilePath; // 실행 경로
+			execl(exe_string.c_str(), exe_string.c_str(), nullptr);
 			exit(0);
 		}
 		int status;
@@ -88,18 +91,19 @@ void Run::executing(Mark* mark)
 		while (true)
 		{
 			wait4(pid, &status, 0, &ruse);
-			ptrace(PTRACE_GETREGS, pid, 0, &reg);
+			ptrace(PTRACE_GETREGS, pid, nullptr, &reg);
 
 			// 정상 종료
 			if (WIFEXITED(status))
 			{
-				logger->log('[' + mark->userId + "] " + std::to_string(now_tc_num) + " test case, nomal shutdown");
+				logger->log(mark, std::to_string(now_tc_num) + " TC normal shutdown");
 
 				if (WEXITSTATUS(status) != 0)
 				{
 					mark->state = State::RTE;
 					break;
 				}
+
 				const string tc_stdout = mark->problemNumPath + std::to_string(now_tc_num) + ".out";
 				if (!grading(mark->execute_stdout_file_path.c_str(), tc_stdout))
 				{
@@ -121,17 +125,19 @@ void Run::executing(Mark* mark)
 					mark->state = State::RTE;
 					break;
 				}
-
+			//	ptrace(PTRACE_KILL, pid, nullptr, nullptr);
 				break;
 			}
 
-			ptrace(PTRACE_SYSCALL, pid, 0, 0);
+			ptrace(PTRACE_SYSCALL, pid, nullptr, nullptr);
 		}
 
 		if (mark->state != State::Executing) break;
 		++(mark->AC_NUM);
 	}
 	if (TC_NUM < now_tc_num) mark->state = State::AC;
+
+	logger->log(mark, "execute end");
 }
 
 bool Run::grading(const string& user_out_file_path, const string& ac_out_file_path)

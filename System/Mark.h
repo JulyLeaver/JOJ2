@@ -10,7 +10,7 @@ enum class State;
 ../Users/userId/
 userId: 오직 알파벳 소문자
 
-소스 파일 이름: 문제번호.년-월-일-시간-분-초.cpp
+소스 파일 이름: 제출번호.문제번호.년-월-일-시간-분-초.cpp
 실행 파일: (소스 파일 이름).bin
 제출한 코드의 stdout: (소스 파일 이름).stdout
 제출한 코드의 컴파일러 에러 메시지 stderr: (소스 파일 이름).compile.stderr
@@ -22,10 +22,13 @@ struct Mark
 {
 public:
 	bool support = true;
+	string msg = "";
 
 	const string userId;		// 사용자 id
 	const string srcFileName;	// 채점 소스 파일 이름
 	const int problemNum;		// 문제 번호
+
+	const int judge_number;
 
 	const string srcFilePath;	// 채점 소스 파일 경로
 	const string binFilePath;	// 실행 파일 경로
@@ -53,6 +56,6 @@ public:
 	int AC_NUM;		// 내가 맞은 테스트 케이스 수
 
 public:
-	Mark(const string& userId, const string& srcFileName, const int problemNum);
+	Mark(const string& userId, const string& srcFileName, const int problemNum, const int judge_number = -1);
 	~Mark();
 };

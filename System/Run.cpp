@@ -104,11 +104,16 @@ void Run::executing(Mark* mark)
 					break;
 				}
 
+				logger->log(mark, std::to_string(now_tc_num) + " TC grading start");
+
 				const string tc_stdout = mark->problemNumPath + std::to_string(now_tc_num) + ".out";
 				if (!grading(mark->execute_stdout_file_path.c_str(), tc_stdout))
 				{
 					mark->state = State::WA;
 				}
+
+				logger->log(mark, std::to_string(now_tc_num) + " TC grading end");
+
 				break;
 			}
 
@@ -174,13 +179,15 @@ bool Run::grading(const string& user_out_file_path, const string& ac_out_file_pa
 bool Run::cmp(const char* ac, const char* user)
 {
 	int acS = strlen(ac), userS = strlen(user);
-
+	
 	for (--acS; 0 <= acS; --acS) if ((ac[acS] != ' ') && (ac[acS] != '\n') && (ac[acS] != '\0')) break;
 	for (--userS; 0 <= userS; --userS) if ((user[userS] != ' ') && (user[userS] != '\n') && (user[userS] != '\0')) break;
 
 	if (acS != userS) return false;
 
-	for (int i = 0; i < acS; ++i) if (ac[i] != user[i]) return false;
+	// 널문자도 제거 하므로 닫힌 구간
+	for (int i = 0; i <= acS; ++i) if (ac[i] != user[i]) return false;
 
 	return true;
 }
+

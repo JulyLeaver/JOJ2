@@ -34,7 +34,8 @@ void Compile::loop(std::unique_lock<std::mutex>& ul)
 			exit(0);
 		}
 		int status;
-		wait(&status);
+		waitpid(pid, &status, 0);
+	//	wait(&status);
 
 		if (WIFEXITED(status) == 0 || WEXITSTATUS(status) != 0) mark->state = State::CompileError;
 		else mark->state = State::ExeIdle;

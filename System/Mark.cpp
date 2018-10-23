@@ -2,7 +2,7 @@
 #include "Mark.h"
 #include "Judge.h"
 
-const char* CONDITION_FILE_NAME = "cond";	// 문제 조건 파일 이름
+const char* CONDITION_FILE_NAME = "condi";	// 문제 조건 파일 이름
 const char* EXECUTE_STDOUT_FILE_EXTENSION = ".stdout";
 const char* COMPILE_STDERR_FILE_EXTENSION = ".compile.stderr";
 const char* USER_DIR_PATH = "../Users/";
@@ -40,7 +40,7 @@ Mark::Mark(const string& userId, const string& srcFileName, const int problemNum
 	else if (extension == "cpp")
 	{
 		compileCmd = new const char*[8]{
-			"gcc", srcFilePath.c_str(), "-o", binFilePath.c_str(), "-std=c++11", "-DONLINE_JUDGE", nullptr
+			"g++", srcFilePath.c_str(), "-o", binFilePath.c_str(), "-std=c++11", "-DONLINE_JUDGE", nullptr
 		};
 	}
 	else

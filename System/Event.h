@@ -28,7 +28,7 @@ public:
 		_thread = std::thread(&Event::process, this);
 
 		std::unique_lock<std::mutex> ul(_mutexStart);
-		_cvStart.wait(ul, [=]()->bool {
+		_cvStart.wait(ul, [&]()->bool {
 			return isStart;
 		});
 	}
@@ -75,7 +75,7 @@ private:
 	}
 
 protected:
-	void push(T _t)
+	void push(const T& _t)
 	{
 		std::unique_lock<std::mutex> ul(_mutex);
 		_q.push(_t);

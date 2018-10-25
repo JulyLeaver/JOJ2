@@ -10,7 +10,7 @@ class Run : public Event<Mark*>
 private:
 	Logger* logger;
 	WrapUp* wp;
-	int CCU = 2; // 동시 채점자 수
+	int CCU; // 동시 채점자 수
 
 	const int OUT_MAX = 128; // 출력 파일의 한 라인 최대 길이
 	char* user_out, *ac_out;

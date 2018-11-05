@@ -1,2 +1,4 @@
 # JOJ2
-Jinho Online Judge
+J Online Judge
+
+<img src="./JOJ2.png"></img>
